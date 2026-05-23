@@ -11,6 +11,8 @@ RUN apk add --no-cache python3 alpine-sdk
 
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
 
+RUN pnpm install
+
 FROM base AS api
 WORKDIR /app
 
