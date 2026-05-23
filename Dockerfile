@@ -9,7 +9,7 @@ COPY . /app
 RUN corepack enable
 RUN apk add --no-cache python3 alpine-sdk
 
-RUN --mount=type=cache,target=/pnpm/store pnpm install
+RUN pnpm install
 
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
 
