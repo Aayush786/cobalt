@@ -1,21 +1,19 @@
 FROM node:24-alpine AS base
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 FROM base AS build
 WORKDIR /app
 
 COPY . /app
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN apk add --no-cache python3 alpine-sdk
 
-# 1. install dependencies FIRST
 RUN pnpm install
-
-# 2. then deploy filtered app
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
-
 
 FROM base AS api
 WORKDIR /app
