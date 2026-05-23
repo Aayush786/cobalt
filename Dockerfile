@@ -16,7 +16,6 @@ RUN pnpm install
 # 2. then deploy filtered app
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /prod/api
 
-RUN pnpm install
 
 FROM base AS api
 WORKDIR /app
