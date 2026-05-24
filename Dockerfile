@@ -12,8 +12,8 @@ RUN apk add --no-cache python3 alpine-sdk
 
 WORKDIR /app
 
-# Ensure the 'node' user owns the working directory and the pnpm cache
-RUN chown -R node:node /app /pnpm
+# Ensure both directories exist on disk before running chown
+RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
 # Switch to the non-root node user before copying files or installing
 USER node
@@ -35,13 +35,16 @@ RUN pnpm deploy --filter=@imput/cobalt-api --prod /app/prod/api
 FROM base AS api
 WORKDIR /app
 
-# Ensure runtime directory is owned by node
-RUN chown -R node:node /app
+# Ensure runtime and pnpm directories exist and are owned by node
+RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
 USER node
 
-# 3. CRITICAL: Copy the isolated deployment from the build stage
+# 3. Copy the isolated production deployment from the build stage
 COPY --from=build --chown=node:node /app/prod/api ./
 
+# Expose your API port (change if your app uses a different port)
 EXPOSE 3000
-CMD [ "node", "src/index.js" ] # Adjust this to match your API's start file
+
+# Update this line to match your API's production start command
+CMD [ "node", "src/index.js" ]
