@@ -5,22 +5,25 @@ ENV PATH="$PNPM_HOME:$PATH"
 ENV CI=true
 ENV NPM_CONFIG_LOGLEVEL=warn
 
-# 1. Install build tools and enable corepack globally as root
+# Install compilation tools and enable corepack globally as root
 RUN apk add --no-cache python3 build-base && corepack enable
 
+# Set the working directory to the explicit location of your project code
 WORKDIR /app
 RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
-# 2. Switch to node user now that global configurations are complete
 USER node
 
-COPY --chown=node:node package.json pnpm-lock.yaml* ./
-
-# 3. Direct install (Corepack will fetch the lockfile-specified pnpm version automatically)
-RUN pnpm install --frozen-lockfile
-
+# Copy everything into the container first
 COPY --chown=node:node . /app
+
+# Switch context directly into the subdirectory containing package.json
+WORKDIR /app/api
+
+# Run install directly inside the folder where the dependencies are declared
+RUN pnpm install --frozen-lockfile
 
 EXPOSE 3000
 
-CMD [ "node", "/app/api/src/cobalt.js" ]
+# Execute relative to the configured api subdirectory context
+CMD [ "node", "src/cobalt.js" ]
