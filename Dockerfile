@@ -8,17 +8,20 @@ ENV NPM_CONFIG_LOGLEVEL=warn
 RUN corepack enable
 
 FROM base AS build
-# isolated-vm needs native build tools, keeping python/sdk here
+# isolated-vm requires native compilation tools to build successfully
 RUN apk add --no-cache python3 alpine-sdk
 
 WORKDIR /app
 RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
 USER node
-COPY --chown=node:node . /app
+COPY --chown=node:node package.json pnpm-lock.yaml* ./
 
 RUN corepack prepare --activate
 RUN pnpm install --frozen-lockfile
+
+# Copy the rest of your application source code
+COPY --chown=node:node . /app
 
 # Final clean runtime stage
 FROM base AS api
@@ -28,11 +31,11 @@ RUN mkdir -p /app && chown -R node:node /app
 
 USER node
 
-# Copy the entire workspace over so @imput/version-info is naturally available
+# Copy over everything built from the build stage
 COPY --from=build --chown=node:node /app ./
 
-# Expose Cobalt API port
+# Expose Cobalt API's default port
 EXPOSE 3000
 
-# Launch using your exact entry path defined in package.json
-CMD [ "node", "apps/cobalt-api/src/cobalt.js" ]
+# Launch directly using the native root path
+CMD [ "node", "src/cobalt.js" ]
