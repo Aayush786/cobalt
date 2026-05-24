@@ -31,7 +31,7 @@ RUN pnpm install
 RUN pnpm deploy --filter=@imput/cobalt-api --prod /app/prod/api
 
 
-# Final lean runtime stage
+# Final clean runtime stage
 FROM base AS api
 WORKDIR /app
 
@@ -40,8 +40,14 @@ RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
 USER node
 
-# Expose your API port (change if your app uses a different port)
+# Copy the entire workspace build context instead of the filtered bundle
+COPY --from=build --chown=node:node /app ./
+
+# Change our working directory context to the specific sub-package folder location
+WORKDIR /app/apps/cobalt-api
+
+# Expose your API port 
 EXPOSE 3000
 
-# Update this line to match your API's production start command
-CMD [ "node", "./src/cobalt.js" ]
+# Let pnpm handle executing the script straight out of its package context
+CMD [ "pnpm", "start" ]
