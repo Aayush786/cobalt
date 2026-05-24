@@ -44,4 +44,4 @@ USER node
 EXPOSE 3000
 
 # Update this line to match your API's production start command
-CMD [ "node", "src/cobalt.js" ]
+CMD [ "node", "./src/cobalt.js" ]
