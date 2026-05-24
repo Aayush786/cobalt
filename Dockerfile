@@ -19,8 +19,10 @@ COPY --chown=node:node . /app
 RUN corepack prepare --activate
 RUN pnpm install
 
+# --- ADDED STEP: Compile your TypeScript code first ---
+RUN pnpm --filter=@imput/cobalt-api run build
+
 # Deploying with full isolation. 
-# This bundles @imput/version-info straight into the deployment node_modules
 RUN mkdir -p /home/node/deploy && pnpm deploy /home/node/deploy --filter=@imput/cobalt-api --prod
 
 
@@ -28,7 +30,6 @@ RUN mkdir -p /home/node/deploy && pnpm deploy /home/node/deploy --filter=@imput/
 FROM base AS api
 WORKDIR /app
 
-# Ensure standard runtime directories exist
 RUN mkdir -p /app && chown -R node:node /app
 
 USER node
@@ -36,9 +37,7 @@ USER node
 # Copy the completely compiled bundle over
 COPY --from=build --chown=node:node /home/node/deploy ./
 
-# Expose your API port 
 EXPOSE 3000
 
-# FIX: Bypass the pnpm workspace check entirely by invoking node directly.
-# Replace "dist/main.js" with the actual entry file defined in your API's package.json "main" field if it differs!
-CMD [ "node", "dist/main.js" ]
+# We will double-check this path below!
+CMD [ "node", "dist/index.js" ]
