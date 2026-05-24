@@ -17,10 +17,11 @@ COPY --chown=node:node . /app
 
 WORKDIR /app/api
 
-# 2. Fake a git repository root right here so Cobalt's check passes
+# 2. Fake a complete git setup including an upstream remote so Cobalt parses happily
 RUN git init && \
     git config user.name "railway" && \
     git config user.email "railway@local.internal" && \
+    git remote add origin https://github.com/imputnet/cobalt.git && \
     git add . && \
     git commit -m "initial release"
 
