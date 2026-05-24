@@ -40,9 +40,6 @@ RUN mkdir -p /app /pnpm && chown -R node:node /app /pnpm
 
 USER node
 
-# 3. Copy the isolated production deployment from the build stage
-COPY --from=build --chown=node:node /app/prod/api ./
-
 # Expose your API port (change if your app uses a different port)
 EXPOSE 3000
 
